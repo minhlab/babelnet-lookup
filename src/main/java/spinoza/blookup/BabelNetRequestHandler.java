@@ -27,6 +27,8 @@ public class BabelNetRequestHandler extends AbstractHandler {
 
     private static final Logger LOGGER = Logger.getLogger(BabelNetRequestHandler.class);
 
+    private static final Pattern TEXT_REQUESTS = Pattern
+            .compile("^/text/([^/]+)/([^/]+)$");
     private static final Pattern WORDNET_REQUESTS = Pattern
             .compile("^/wordnet/([^/]+)$");
     private static final Pattern WIKIPEDIA_REQUESTS = Pattern
@@ -44,6 +46,7 @@ public class BabelNetRequestHandler extends AbstractHandler {
         LOGGER.debug("Target: " + target);
         response.setContentType("text/plain");
         boolean handled = handleWordNetRequest(target, response) || 
+        		handleTextRequest(target, response) ||
                 handleWikipediaRequest(target, response) || 
                 handleRelatedSynsetRequest(target, response) ||
                 handleSensesRequest(target, response);
@@ -80,6 +83,25 @@ public class BabelNetRequestHandler extends AbstractHandler {
             String offset = matcher.group(1);
             LOGGER.debug("WordNet offset: " + offset);
             List<BabelSynset> synsets = bn.getSynsetsFromWordNetOffset(offset);
+            if (synsets != null && !synsets.isEmpty()) {
+                for (BabelSynset synset : synsets) {
+                    response.getWriter().println(synset.getId());
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    private boolean handleTextRequest(String target,
+            HttpServletResponse response) throws IOException {
+        Matcher matcher = TEXT_REQUESTS.matcher(target);
+        if (matcher.find()) {
+            String langId = matcher.group(1);
+            String query = matcher.group(2);
+            Language lang = Language.valueOf(langId.toUpperCase());
+			List<BabelSynset> synsets = bn.getSynsets(lang, query);
             if (synsets != null && !synsets.isEmpty()) {
                 for (BabelSynset synset : synsets) {
                     response.getWriter().println(synset.getId());
