@@ -7,10 +7,10 @@ A simple BabelNet web service for user and non-Java programs.
 1. Change directory into BabelNet-API-2.5.1
 2. Compile: `ant -f build.xml`
 3. Install into local Maven repository:
-````
-mvn install:install-file -Dfile=babelnet-api-2.5.1.jar -DgroupId=it.uniroma1.lcl -DartifactId=babelnet -Dversion=2.5.1 -Dpackaging=jar -DgeneratePom=true
-mvn install:install-file -Dfile=lib/jlt-1.0.0.jar -DgroupId=it.uniroma1.lcl -DartifactId=jlt -Dversion=1.0.0 -Dpackaging=jar -DgeneratePom=true
-````
+ 
+ `mvn install:install-file -Dfile=babelnet-api-2.5.1.jar -DgroupId=it.uniroma1.lcl -DartifactId=babelnet -Dversion=2.5.1 -Dpackaging=jar -DgeneratePom=true`
+ 
+ `mvn install:install-file -Dfile=lib/jlt-1.0.0.jar -DgroupId=it.uniroma1.lcl -DartifactId=jlt -Dversion=1.0.0 -Dpackaging=jar -DgeneratePom=true`
 4. Make sure that the `babelnet.dir` property in 
 `config/babelnet.var.properties` point to the directory 
 where BabelNet data lives. 
@@ -48,38 +48,38 @@ v (verb), r (adverb), a (adjective)).
 
 **WordNet:**
 
-````
+```python
 import urllib
 url = "http://%s:%d/wordnet/%s" %(host, port, offset)
 f = urllib.urlopen(url)
 if f.getcode() == 200:
     synsets = f.read().strip().split("\n")
-````
+```
 
 **Wikipedia**
 
-````
+```python
 url = "http://%s:%d/wikipedia/%s/n" %(host, port, offset)
 f = urllib.urlopen(url)
 if f.getcode() == 200:
 	synsets = f.read().strip().split("\n")
-````
+```
 
 **Related synsets**
 
-````
+```python
 url = "http://%s:%d/synset/%s/related" %(host, port, offset)
 f = urllib.urlopen(url)
 if f.getcode() == 200:
     lines = f.read().strip().split("\n")
     lines = [line.split('\t') for line in lines]
-    related_synsets = [{'symbol': fields[0], 'id': fields[1], 'name': fields[2]}
+    related_synsets = [{'relation': fields[0], 'synset': fields[1]}
                 for fields in lines] 
-````
+```
 
 **Senses**
 
-````
+```python
 url = "http://%s:%d/synset/%s/senses" %(host, port, offset)
 f = urllib.urlopen(url)
 if f.getcode() == 200:
@@ -87,6 +87,6 @@ if f.getcode() == 200:
     lines = [line.split('\t') for line in lines]
     senses = [{'lemma': fields[0], 'pos': fields[1], 'language': fields[2], 'source': fields[3]}
                 for fields in lines] 
-````
+```
 
 **Notice:** urllib doesn't support `with ... as ...` construction.
