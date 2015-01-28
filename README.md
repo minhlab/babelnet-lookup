@@ -40,8 +40,8 @@ Press `Ctrl+C` to terminate the server.
 - Text to BabelNet: [localhost:9000/text/en/mouse](http://localhost:9000/text/en/mouse) (change to your language and key word).
 - WordNet to BabelNet: [localhost:9000/wordnet/15203791n](http://localhost:9000/wordnet/15203791n) (change to your offset).
 - Wikipedia to BabelNet: [localhost:9000/wikipedia/Mars/n](http://localhost:9000/wikipedia/Mars/n) 
-(plugin your page, the second place is POS, being one of these values: n (noun), 
-v (verb), r (adverb), a (adjective)).
+(plugin your page, the second place is POS, being one of these values: 
+`n` (noun), `v` (verb), `r` (adverb), `a` (adjective)).
 - Related synsets: [localhost:9000/synset/bn:00000002n/related](http://localhost:9000/synset/bn:00000002n/related) (change to your offset).
 - Senses: [localhost:9000/synset/bn:00000002n/senses](http://localhost:9000/synset/bn:00000002n/senses) (change to your offset).
 
