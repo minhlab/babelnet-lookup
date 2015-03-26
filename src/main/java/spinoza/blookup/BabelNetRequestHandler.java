@@ -2,6 +2,7 @@ package spinoza.blookup;
 
 import it.uniroma1.lcl.babelnet.BabelNet;
 import it.uniroma1.lcl.babelnet.BabelSense;
+import it.uniroma1.lcl.babelnet.BabelSenseSource;
 import it.uniroma1.lcl.babelnet.BabelSynset;
 import it.uniroma1.lcl.jlt.util.Language;
 
@@ -29,6 +30,8 @@ public class BabelNetRequestHandler extends AbstractHandler {
 
     private static final Pattern TEXT_REQUESTS = Pattern
             .compile("^/text/([^/]+)/([^/]+)$");
+    private static final Pattern TEXT_NON_REDIRECT_REQUESTS = Pattern
+            .compile("^/textnr/([^/]+)/([^/]+)/([^/]+)$");
     private static final Pattern WORDNET_REQUESTS = Pattern
             .compile("^/wordnet/([^/]+)$");
     private static final Pattern WIKIPEDIA_REQUESTS = Pattern
@@ -47,6 +50,7 @@ public class BabelNetRequestHandler extends AbstractHandler {
         response.setContentType("text/plain");
         boolean handled = handleWordNetRequest(target, response) || 
         		handleTextRequest(target, response) ||
+        		handleTextNonRedirectRequest(target, response) ||
                 handleWikipediaRequest(target, response) || 
                 handleRelatedSynsetRequest(target, response) ||
                 handleSensesRequest(target, response);
@@ -102,6 +106,28 @@ public class BabelNetRequestHandler extends AbstractHandler {
             String query = matcher.group(2);
             Language lang = Language.valueOf(langId.toUpperCase());
 			List<BabelSynset> synsets = bn.getSynsets(lang, query);
+            if (synsets != null && !synsets.isEmpty()) {
+                for (BabelSynset synset : synsets) {
+                    response.getWriter().println(synset.getId());
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    private boolean handleTextNonRedirectRequest(String target,
+            HttpServletResponse response) throws IOException {
+        Matcher matcher = TEXT_NON_REDIRECT_REQUESTS.matcher(target);
+        if (matcher.find()) {
+            String langId = matcher.group(1);
+            String posId = matcher.group(2);
+            String query = matcher.group(3);
+            Language lang = Language.valueOf(langId.toUpperCase());
+            POS pos = POS.getPartOfSpeech(posId.charAt(0));
+			List<BabelSynset> synsets = bn.getSynsets(lang, query, pos, false,
+					BabelSenseSource.values());
             if (synsets != null && !synsets.isEmpty()) {
                 for (BabelSynset synset : synsets) {
                     response.getWriter().println(synset.getId());

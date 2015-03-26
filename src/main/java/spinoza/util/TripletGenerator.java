@@ -94,6 +94,7 @@ public class TripletGenerator {
 	}
 
 	private static void extractRelatedRelationships(BabelNet bn) throws IOException {
+		int count = 0;
 		for (BabelSynsetIterator it = bn.getSynsetIterator(); it.hasNext();) {
 			BabelSynset synset = (BabelSynset) it.next();
 			Map<IPointer, List<BabelSynset>> relatedMap = synset.getRelatedMap();
@@ -103,9 +104,14 @@ public class TripletGenerator {
 	                IPointer pointer = entry.getKey();
 	                System.out.printf("%s\t%s\t%s\n", synset.getId(),
 	                		pointer.getSymbol(), relatedSynset.getId());
+	                count++;
+	                if (count % 10000 == 0) {
+	                	System.err.println(count + "...\n");
+	                }
                 }
             }
 		}
+		System.err.println("Successfully finished!\n");
 	}
 
 	private static void extractCategories(BabelNet bn) throws IOException {
