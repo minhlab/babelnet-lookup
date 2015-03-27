@@ -43,7 +43,8 @@ public class TripletGenerator {
         	extractWordNetRelationships(BabelNet.getInstance());
 		}
         if (cmd.hasOption("r")) {
-        	extractRelatedRelationships(BabelNet.getInstance());
+        	extractRelatedRelationships(BabelNet.getInstance(),
+        			cmd.getOptionValue("from", ""));
 		}
         if (cmd.hasOption("c")) {
         	extractCategories(BabelNet.getInstance());
@@ -93,23 +94,30 @@ public class TripletGenerator {
 		}
 	}
 
-	private static void extractRelatedRelationships(BabelNet bn) throws IOException {
+	private static void extractRelatedRelationships(BabelNet bn, String from) throws IOException {
+		from = from.trim();
 		int count = 0;
+		boolean started = from.isEmpty();
 		for (BabelSynsetIterator it = bn.getSynsetIterator(); it.hasNext();) {
 			BabelSynset synset = (BabelSynset) it.next();
-			Map<IPointer, List<BabelSynset>> relatedMap = synset.getRelatedMap();
-			for (Entry<IPointer, List<BabelSynset>> entry : relatedMap
-                    .entrySet()) {
-                for (BabelSynset relatedSynset : entry.getValue()) {
-	                IPointer pointer = entry.getKey();
-	                System.out.printf("%s\t%s\t%s\n", synset.getId(),
-	                		pointer.getSymbol(), relatedSynset.getId());
-	                count++;
-	                if (count % 10000 == 0) {
-	                	System.err.println(count + "...\n");
-	                }
-                }
-            }
+			if (started) {
+				Map<IPointer, List<BabelSynset>> relatedMap = synset.getRelatedMap();
+				for (Entry<IPointer, List<BabelSynset>> entry : relatedMap
+	                    .entrySet()) {
+		                for (BabelSynset relatedSynset : entry.getValue()) {
+				                IPointer pointer = entry.getKey();
+				                System.out.printf("%s\t%s\t%s\n", synset.getId(),
+				                		pointer.getSymbol(), relatedSynset.getId());
+				                count++;
+				                if (count % 10000 == 0) {
+				                	System.err.println(count + "...\n");
+				                }
+		                }
+	            }
+			} else {
+				System.err.format("Skipped %s\n", synset.getId());
+				started = from.equals(synset.getId()); 
+			}
 		}
 		System.err.println("Successfully finished!\n");
 	}
@@ -287,6 +295,7 @@ public class TripletGenerator {
         try {
         	options.addOption("wn", false, "WordNet only");
         	options.addOption("r", false, "related synsets");
+        	options.addOption("from", true, "starting from");
         	options.addOption("c", false, "categories");
         	options.addOption("t", false, "DBpedia ontology types");
         	options.addOption("o", false, "DBpedia ontology hierarchy itself");
