@@ -95,29 +95,39 @@ public class TripletGenerator {
 	}
 
 	private static void extractRelatedRelationships(BabelNet bn, String from) throws IOException {
-		from = from.trim();
 		int count = 0;
-		boolean started = from.isEmpty();
-		for (BabelSynsetIterator it = bn.getSynsetIterator(); it.hasNext();) {
-			BabelSynset synset = (BabelSynset) it.next();
-			if (started) {
-				Map<IPointer, List<BabelSynset>> relatedMap = synset.getRelatedMap();
-				for (Entry<IPointer, List<BabelSynset>> entry : relatedMap
-	                    .entrySet()) {
-		                for (BabelSynset relatedSynset : entry.getValue()) {
-				                IPointer pointer = entry.getKey();
-				                System.out.printf("%s\t%s\t%s\n", synset.getId(),
-				                		pointer.getSymbol(), relatedSynset.getId());
-				                count++;
-				                if (count % 10000 == 0) {
-				                	System.err.println(count + "...\n");
-				                }
-		                }
-	            }
-			} else {
-				System.err.format("Skipped %s\n", synset.getId());
-				started = from.equals(synset.getId()); 
+		BabelSynsetIterator it = bn.getSynsetIterator();
+		from = from.trim();
+		if (!from.isEmpty()) {
+			System.err.println("Skipping...\n");
+			int skippingCount = 0;
+			while (it.hasNext()) {
+				BabelSynset synset = (BabelSynset) it.next();
+				if (from.equals(synset.getId())) {
+					break;
+				}
+				skippingCount++;
+				if (skippingCount % 10000 == 0) {
+					System.err.println(skippingCount + "...");
+				}
 			}
+			System.err.println("Skipped " + skippingCount + " synsets.\n");
+		}
+		while (it.hasNext()) {
+			BabelSynset synset = (BabelSynset) it.next();
+			Map<IPointer, List<BabelSynset>> relatedMap = synset.getRelatedMap();
+			for (Entry<IPointer, List<BabelSynset>> entry : relatedMap
+                    .entrySet()) {
+	                for (BabelSynset relatedSynset : entry.getValue()) {
+			                IPointer pointer = entry.getKey();
+			                System.out.printf("%s\t%s\t%s\n", synset.getId(),
+			                		pointer.getSymbol(), relatedSynset.getId());
+			                count++;
+			                if (count % 10000 == 0) {
+			                	System.err.println(count + "...");
+			                }
+	                }
+            }
 		}
 		System.err.println("Successfully finished!\n");
 	}
