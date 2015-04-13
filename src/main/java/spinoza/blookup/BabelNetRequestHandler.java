@@ -41,7 +41,7 @@ public class BabelNetRequestHandler extends AbstractHandler {
     private static final Pattern SENSES_REQUESTS = Pattern
             .compile("^/synset/([^/]+)/senses(?:/(\\w+))$");
     private static final Pattern DBPEDIA_URI_REQUESTS = Pattern
-            .compile("^/synset/([^/]+)/dbpedia_uri(?:/(\\w+))$");
+            .compile("^/synset/([^/]+)/dbpedia_uri(?:/([^/]+))?$");
 
     private BabelNet bn = BabelNet.getInstance();
 
