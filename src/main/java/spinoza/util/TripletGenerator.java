@@ -116,8 +116,7 @@ public class TripletGenerator {
 		while (it.hasNext()) {
 			BabelSynset synset = (BabelSynset) it.next();
 			Map<IPointer, List<BabelSynset>> relatedMap = synset.getRelatedMap();
-			for (Entry<IPointer, List<BabelSynset>> entry : relatedMap
-                    .entrySet()) {
+			for (Entry<IPointer, List<BabelSynset>> entry : relatedMap.entrySet()) {
 	                for (BabelSynset relatedSynset : entry.getValue()) {
 			                IPointer pointer = entry.getKey();
 			                System.out.printf("%s\t%s\t%s\n", synset.getId(),

@@ -39,7 +39,9 @@ public class BabelNetRequestHandler extends AbstractHandler {
     private static final Pattern RELATED_SYNSET_REQUESTS = Pattern
             .compile("^/synset/([^/]+)/related$");
     private static final Pattern SENSES_REQUESTS = Pattern
-            .compile("^/synset/([^/]+)/senses$");
+            .compile("^/synset/([^/]+)/senses(?:/(\\w+))$");
+    private static final Pattern DBPEDIA_URI_REQUESTS = Pattern
+            .compile("^/synset/([^/]+)/dbpedia_uri(?:/(\\w+))$");
 
     private BabelNet bn = BabelNet.getInstance();
 
@@ -53,7 +55,8 @@ public class BabelNetRequestHandler extends AbstractHandler {
         		handleTextNonRedirectRequest(target, response) ||
                 handleWikipediaRequest(target, response) || 
                 handleRelatedSynsetRequest(target, response) ||
-                handleSensesRequest(target, response);
+                handleSensesRequest(target, response) ||
+                handleDBpediaRequest(target, response);
         baseRequest.setHandled(handled);
         // response.sendError(404);
     }
@@ -163,20 +166,50 @@ public class BabelNetRequestHandler extends AbstractHandler {
         }
         return false;
     }
-    
+
     private boolean handleSensesRequest(String target,
             HttpServletResponse response) throws IOException {
         Matcher matcher = SENSES_REQUESTS.matcher(target);
         if (matcher.find()) {
             String id = matcher.group(1);
+            String langId = matcher.group(2);
             LOGGER.debug("BabelNet ID: " + id);
             BabelSynset synset = bn.getSynsetFromId(id);
             if (synset != null) {
-                List<BabelSense> senses = synset.getSenses();
+            	List<BabelSense> senses;
+            	if (langId == null || langId.isEmpty()) {
+					senses = synset.getSenses();
+				} else {
+					senses = synset.getSenses(Language.valueOf(langId.toUpperCase()));
+				}
                 for (BabelSense sense : senses) {
                     response.getWriter().format("%s\t%s\t%s\t%s\n",
                             sense.getLemma(), sense.getPOS(),
                             sense.getLanguage(), sense.getSource());
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    private boolean handleDBpediaRequest(String target,
+            HttpServletResponse response) throws IOException {
+        Matcher matcher = DBPEDIA_URI_REQUESTS.matcher(target);
+        if (matcher.find()) {
+            String id = matcher.group(1);
+            String langId = matcher.group(2);
+            LOGGER.debug("BabelNet ID: " + id);
+            BabelSynset synset = bn.getSynsetFromId(id);
+            if (synset != null) {
+            	List<String> uris;
+            	if (langId == null || langId.isEmpty()) {
+					uris = synset.getDBPediaURIs();
+				} else {
+					uris = synset.getDBPediaURIs(Language.valueOf(langId.toUpperCase()));
+				}
+                for (String uri : uris) {
+                    response.getWriter().println(uri);
                 }
                 return true;
             }
