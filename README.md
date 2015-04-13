@@ -43,7 +43,8 @@ Press `Ctrl+C` to terminate the server.
 (plugin your page, the second place is POS, being one of these values: 
 `n` (noun), `v` (verb), `r` (adverb), `a` (adjective)).
 - Related synsets: [localhost:9000/synset/bn:00000002n/related](http://localhost:9000/synset/bn:00000002n/related) (change to your offset).
-- Senses: [localhost:9000/synset/bn:00000002n/senses](http://localhost:9000/synset/bn:00000002n/senses) (change to your offset).
+- Senses: [localhost:9000/synset/bn:00000002n/senses/en](http://localhost:9000/synset/bn:00000002n/senses/en) (change to your offset, language code is optional).
+- DBpedia URIs: [localhost:9000/synset/bn:00000002n/dbpedia_uri/en](http://localhost:9000/synset/bn:00000002n/dbpedia_uri/en) (change to your offset, language code is optional).
 
 ### Query using Python
 
@@ -91,13 +92,23 @@ if f.getcode() == 200:
 **Senses**
 
 ```python
-url = "http://%s:%d/synset/%s/senses" %(host, port, offset)
+url = "http://%s:%d/synset/%s/senses/en" %(host, port, offset)
 f = urllib.urlopen(url)
 if f.getcode() == 200:
     lines = f.read().strip().split("\n")
     lines = [line.split('\t') for line in lines]
     senses = [{'lemma': fields[0], 'pos': fields[1], 'language': fields[2], 'source': fields[3]}
                 for fields in lines] 
+```
+
+
+**DBpedia URI**
+
+```python
+url = "http://%s:%d/synset/%s/dbpedia_uri/en" %(host, port, offset)
+f = urllib.urlopen(url)
+if f.getcode() == 200:
+    uris = f.read().strip().split("\n")
 ```
 
 **Notice:** urllib doesn't support `with ... as ...` construction.
