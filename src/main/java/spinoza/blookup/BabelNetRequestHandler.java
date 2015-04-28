@@ -36,6 +36,8 @@ public class BabelNetRequestHandler extends AbstractHandler {
             .compile("^/wordnet/([^/]+)$");
     private static final Pattern WIKIPEDIA_REQUESTS = Pattern
             .compile("^/wikipedia/([^/]+)(?:/([^/]))$");
+    private static final Pattern SYNSET_TYPE_REQUESTS = Pattern
+            .compile("^/synset/([^/]+)/type$");
     private static final Pattern RELATED_SYNSET_REQUESTS = Pattern
             .compile("^/synset/([^/]+)/related$");
     private static final Pattern SENSES_REQUESTS = Pattern
@@ -56,7 +58,8 @@ public class BabelNetRequestHandler extends AbstractHandler {
                 handleWikipediaRequest(target, response) || 
                 handleRelatedSynsetRequest(target, response) ||
                 handleSensesRequest(target, response) ||
-                handleDBpediaRequest(target, response);
+                handleDBpediaRequest(target, response) ||
+                handleSynsetTypeRequest(target, response);
         baseRequest.setHandled(handled);
         // response.sendError(404);
     }
@@ -161,6 +164,21 @@ public class BabelNetRequestHandler extends AbstractHandler {
                                 pointer.getSymbol(), relatedSynset.getId());
                     }
                 }
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean handleSynsetTypeRequest(String target,
+            HttpServletResponse response) throws IOException {
+        Matcher matcher = SYNSET_TYPE_REQUESTS.matcher(target);
+        if (matcher.find()) {
+            String id = matcher.group(1);
+            LOGGER.debug("BabelNet ID: " + id);
+            BabelSynset synset = bn.getSynsetFromId(id);
+            if (synset != null) {
+            	response.getWriter().write(synset.getSynsetType().name());
                 return true;
             }
         }
