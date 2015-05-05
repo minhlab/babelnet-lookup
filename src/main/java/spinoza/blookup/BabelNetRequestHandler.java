@@ -29,7 +29,7 @@ public class BabelNetRequestHandler extends AbstractHandler {
     private static final Logger LOGGER = Logger.getLogger(BabelNetRequestHandler.class);
 
     private static final Pattern TEXT_REQUESTS = Pattern
-            .compile("^/text/([^/]+)/([^/]+)$");
+            .compile("^/text/([^/]+)/([^/]+)/([^/]+)?$");
     private static final Pattern TEXT_NON_REDIRECT_REQUESTS = Pattern
             .compile("^/textnr/([^/]+)/([^/]+)/([^/]+)$");
     private static final Pattern WORDNET_REQUESTS = Pattern
@@ -110,8 +110,22 @@ public class BabelNetRequestHandler extends AbstractHandler {
         if (matcher.find()) {
             String langId = matcher.group(1);
             String query = matcher.group(2);
+            String posStr = matcher.group(3);
             Language lang = Language.valueOf(langId.toUpperCase());
-			List<BabelSynset> synsets = bn.getSynsets(lang, query);
+            List<BabelSynset> synsets;
+            if (posStr == null) {
+            	synsets	= bn.getSynsets(lang, query);
+            } else {
+            	POS pos = null;
+            	try {
+            		pos = POS.valueOf(posStr.toUpperCase());
+            	} catch (IllegalArgumentException ex) {
+                	if (posStr.length() == 1) {
+                		pos = POS.getPartOfSpeech(posStr.charAt(0));
+                	}
+            	}
+            	synsets	= bn.getSynsets(lang, query, pos);
+            }
             if (synsets != null && !synsets.isEmpty()) {
                 for (BabelSynset synset : synsets) {
                     response.getWriter().println(synset.getId());
