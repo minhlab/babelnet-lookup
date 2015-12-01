@@ -20,6 +20,17 @@ public class BabelNet2MongoDB {
 	private static final String COLL_NAME = "name-coll";
 	private static final String DB_NAME = "semsig-db";
 
+	public static String normalizeSense(String s){
+		s = s.replaceAll("_", " ");
+		s = s.replaceAll("\\(.*\\)", "");
+		int commaIndex = s.indexOf(",");
+		if (commaIndex != -1)
+		{
+			s = s.substring(0, commaIndex);
+		}
+		return s;
+	}
+
 	public static void main(String[] args) throws Exception {
 		BabelNet bn = BabelNet.getInstance();
 		MongoClient mongoClient = new MongoClient("localhost");
@@ -36,8 +47,8 @@ public class BabelNet2MongoDB {
 			BabelSynset synset = (BabelSynset) it.next();
 			String id = synset.getId().replaceAll("bn:0*", "");
 			Set<String> senseSet = Sets.newHashSet();
-			for (BabelSense sense : synset.getSenses(Language.EN)) {
-				senseSet.add(sense.getLemma().replaceAll("_", " "));
+			for (BabelSense sense : synset.getSenses(Language.EN)) {	
+				senseSet.add(normalizeSense(sense.getLemma()));
 			}
 			BasicDBList senses = new BasicDBList(); 
 			senses.addAll(senseSet);
