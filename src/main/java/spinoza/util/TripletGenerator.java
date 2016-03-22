@@ -2,6 +2,7 @@ package spinoza.util;
 
 import it.uniroma1.lcl.babelnet.BabelCategory;
 import it.uniroma1.lcl.babelnet.BabelNet;
+import it.uniroma1.lcl.babelnet.BabelSense;
 import it.uniroma1.lcl.babelnet.BabelSynset;
 import it.uniroma1.lcl.babelnet.BabelSynsetSource;
 import it.uniroma1.lcl.babelnet.iterators.BabelSynsetIterator;
@@ -55,6 +56,9 @@ public class TripletGenerator {
         }
         if (cmd.hasOption("o")) {
         	extractOntology(sparqlEndPoint, queryDelay);
+        }
+        if (cmd.hasOption("s")) {
+        	extractSenses(BabelNet.getInstance());
         }
 		System.err.println("Done.");
 	}
@@ -126,6 +130,31 @@ public class TripletGenerator {
 			                	System.err.println(count + "...");
 			                }
 	                }
+            }
+		}
+		System.err.println("Successfully finished!\n");
+	}
+
+	private static void extractSenses(BabelNet bn) {
+		int count = 0;
+		BabelSynsetIterator it = bn.getSynsetIterator();
+		while (it.hasNext()) {
+			BabelSynset synset = (BabelSynset) it.next();
+			System.out.print(synset.getId());
+			System.out.print('\t');
+			List<BabelSense> senses = synset.getSenses();
+			for (BabelSense sense : senses) {
+				if (sense.getLanguage() == Language.EN) {
+					System.out.print(sense);
+					System.out.print('\t');
+					System.out.print(sense.getWordNetOffset());
+					System.out.print('\t');
+				}
+			}
+			System.out.println();
+			count++;
+            if (count % 10000 == 0) {
+            	System.err.println(count + "...");
             }
 		}
 		System.err.println("Successfully finished!\n");
@@ -308,12 +337,13 @@ public class TripletGenerator {
         	options.addOption("c", false, "categories");
         	options.addOption("t", false, "DBpedia ontology types");
         	options.addOption("o", false, "DBpedia ontology hierarchy itself");
+        	options.addOption("s", false, "all senses by synset");
         	options.addOption("qdms", "query-delay-ms", true, "Delay after each query to SPARQL endpoint");
         	options.addOption("sparql", true, "URI to SPARQL endpoint (default to DBpedia)");
             CommandLine cmd = new PosixParser().parse(options, args);
 			if (!cmd.hasOption("wn") && !cmd.hasOption("r")
 					&& !cmd.hasOption("c") && !cmd.hasOption("t")
-					&& !cmd.hasOption("o")) {
+					&& !cmd.hasOption("o") && !cmd.hasOption("s")) {
             	System.err.println("At least one type of triplets must be enabled.");
             	printHelpAndExit(options);
             }
